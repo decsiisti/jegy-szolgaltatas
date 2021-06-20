@@ -1,0 +1,195 @@
+openapi: 3.0.1
+info:
+  title: Ticket service API module
+  description: Clients can access the demo ticket service through this API.
+  version: '1.0'
+tags:
+- name: event
+  description: List events and reserve seats for them
+paths:
+  /getEvents:
+    get:
+      tags:
+      - event
+      summary: Get the list of events
+      operationId: getEvents
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/GeneralError'
+      security:
+      - user_token: []
+
+  /getEvent/{EventId}:
+    get:
+      tags:
+      - event
+      summary: Get the details of an Event
+      operationId: getEvent
+      parameters:
+        - name: EventId
+          in: path
+          description: The ID of the Event
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetails'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/GeneralError'
+      security:
+      - user_token: []
+
+  /pay:
+    post:
+      tags:
+      - event
+      summary: Reserve a seat
+      operationId: reserveSeat
+      parameters:
+      - name: EventId
+        in: query
+        description: The ID of the Event
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: SeatId
+        in: query
+        description: The ID of the Seat
+        required: true
+        schema:
+          type: string
+      - name: CardId
+        in: query
+        description: The ID of the Card that will be used for payment
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SuccessfulReservation'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/GeneralError'
+      security:
+      - user_token: []
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          description: The ID of the Event
+        title:
+          type: string
+          description: The title of the Event
+          example: "Májusi mulatság"
+        location:
+          type: string
+          description: The location where the Event takes place
+        startTimestamp:
+          type: integer
+          format: int64
+          description: The timestamp when the Event starts
+        endTimestamp:
+          type: integer
+          format: int64
+          description: The timestamp when the Event ends
+
+    EventList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Event'
+
+    ErrorResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+        ErrorCode:
+          type: integer
+
+    Seat:
+      type: object
+      properties:
+        id:
+          type: string
+        price:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        reserved:
+          type: boolean
+
+    EventDetails:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+        seats:
+          type: array
+          items:
+            $ref: '#/components/schemas/Seat'
+            
+    SuccessfulReservation:
+      type: object
+      properties:
+        Success:
+          type: boolean
+        ReservationId:
+          type: integer
+          format: int64
+
+  responses:
+    NotFound:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    GeneralError:
+      description: General error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  securitySchemes:
+    user_token:
+      type: apiKey
+      name: User-Token
+      in: header
