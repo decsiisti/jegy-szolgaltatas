@@ -1,6 +1,6 @@
-package service;
+package core.service;
 
-import model.User;
+import core.model.User;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;

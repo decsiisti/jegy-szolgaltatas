@@ -1,10 +1,17 @@
-package model;
+package core.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "UserDevice")
-public class UserDevice {
+public class UserDevice implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private Long id;
+
     @ManyToOne
     @JoinColumn(name="userId", nullable = false)
     private User user;
@@ -14,6 +21,14 @@ public class UserDevice {
 
     public UserDevice () {
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public User getUser() {
@@ -30,5 +45,14 @@ public class UserDevice {
 
     public void setDeviceHash(String deviceHash) {
         this.deviceHash = deviceHash;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDevice{" +
+                "id=" + id +
+                ", user=" + user +
+                ", deviceHash='" + deviceHash + '\'' +
+                '}';
     }
 }

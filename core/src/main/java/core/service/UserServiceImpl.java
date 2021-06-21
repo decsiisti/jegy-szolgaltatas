@@ -1,10 +1,10 @@
-package service;
+package core.service;
 
-import model.User;
+import core.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import repository.UserRepository;
+import core.repository.UserRepository;
 
 import java.util.Base64;
 import java.util.List;
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         if(parts.length != 3)
             return Optional.empty();
 
-        return userRepository.findById(Long.getLong(parts[1]));
+        return userRepository.findById(Long.valueOf(parts[1]));
     }
 
     @Override
