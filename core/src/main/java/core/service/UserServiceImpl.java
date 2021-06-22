@@ -1,7 +1,7 @@
 package core.service;
 
+import core.model.BankCard;
 import core.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import core.repository.UserRepository;
@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -47,6 +46,36 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean hasSufficientFunds(User user, String cardId, Long amount) {
-        return user.getBankCards().stream().anyMatch(card -> cardId.equals(card.getCardId()) && card.getAmount() > amount);
+        return user.getBankCards().stream().anyMatch(card -> cardId.equals(card.getCardId()) && card.getAmount() >= amount);
+    }
+
+    @Override
+    public boolean decreaseBalance(User user, String cardId, Long amount) {
+        Optional<BankCard> c = user.getBankCards().stream().filter(card -> cardId.equals(card.getCardId())).findAny();
+        if(c.isEmpty()) {
+            return false;
+        }
+
+        BankCard card = c.get();
+        if(card.getAmount() >= amount) {
+            card.setAmount(card.getAmount() - amount);
+            userRepository.saveAndFlush(user);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean increaseBalance(User user, String cardId, Long amount) {
+        Optional<BankCard> c = user.getBankCards().stream().filter(card -> cardId.equals(card.getCardId())).findAny();
+        if(c.isEmpty()) {
+            return false;
+        }
+
+        BankCard card = c.get();
+        card.setAmount(card.getAmount() + amount);
+        userRepository.saveAndFlush(user);
+        return true;
     }
 }

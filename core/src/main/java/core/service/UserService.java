@@ -13,4 +13,6 @@ public interface UserService {
     Optional<User> validateToken(String token);
     boolean hasBankCard(User user, String cardId);
     boolean hasSufficientFunds(User user, String cardId, Long amount);
+    boolean decreaseBalance(User user, String cardId, Long amount);
+    boolean increaseBalance(User user, String cardId, Long amount);
 }
