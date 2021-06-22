@@ -3,6 +3,8 @@ info:
   title: Ticket service Ticket module
   description: The Ticket module is the hub of the system, it communicates with the partner module and provides the business logic for reserving seats for events.
   version: '1.0'
+servers:
+  - url: http://localhost:11111
 tags:
   - name: ticket
     description: List events and reserve seats for them
