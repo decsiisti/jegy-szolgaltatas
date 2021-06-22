@@ -38,6 +38,11 @@
             <artifactId>springfox-swagger2</artifactId>
             <version>2.9.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -50,6 +55,7 @@
                 <!-- /RELEASE_VERSION -->
                 <executions>
                     <execution>
+                        <id>api-module</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -61,6 +67,23 @@
                             <configOptions>
                                 <delegatePattern>true</delegatePattern>
                                 <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>ticketApi</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../src/main/resources/ticket-module.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>ticket.client.api</apiPackage>
+                            <modelPackage>ticket.client.model</modelPackage>
+                            <configOptions>
+                                <library>resttemplate</library>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <dateLibrary>java8</dateLibrary>
                             </configOptions>
                         </configuration>
                     </execution>
