@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import core.service.UserServiceImpl;
 
+import java.util.Optional;
+
 @RestController
 public class UserController {
 
@@ -19,15 +21,15 @@ public class UserController {
     }
 
     @GetMapping("/validateToken")
-    boolean validateToken(@RequestParam String token)
+    Long validateToken(@RequestParam String token)
     {
         if(token.isEmpty()) {
             throw new CoreErrorException(new CoreError(10050L, "No user token provided with the request."));
         }
 
-        userService.validateToken(token).orElseThrow(() -> new CoreErrorException(new CoreError(10051L, "The provided user token is expired or not recognizable.")));
+        User user = userService.validateToken(token).orElseThrow(() -> new CoreErrorException(new CoreError(10051L, "The provided user token is expired or not recognizable.")));
 
-        return true;
+        return user.getId();
     }
 
     @GetMapping("/hasBankCard")
