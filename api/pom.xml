@@ -25,14 +25,8 @@
             <version>2.4.6</version>
         </dependency>
         <dependency>
-            <groupId>com.ticketservice</groupId>
-            <artifactId>ticketservice-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ticketservice</groupId>
-            <artifactId>ticketservice-ticket</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -62,10 +56,11 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/api-definition.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.ticketservice.api.generated.api</apiPackage>
-                            <modelPackage>com.ticketservice.api.generated.model</modelPackage>
+                            <apiPackage>api</apiPackage>
+                            <modelPackage>model</modelPackage>
                             <configOptions>
                                 <delegatePattern>true</delegatePattern>
+                                <useTags>true</useTags>
                             </configOptions>
                         </configuration>
                     </execution>
