@@ -111,13 +111,11 @@ components:
         location:
           type: string
           description: The location where the Event takes place
-        startTimestamp:
-          type: integer
-          format: int64
+        startTimeStamp:
+          type: string
           description: The timestamp when the Event starts
-        endTimestamp:
-          type: integer
-          format: int64
+        endTimeStamp:
+          type: string
           description: The timestamp when the Event ends
 
     EventList:
