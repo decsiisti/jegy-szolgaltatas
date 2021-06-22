@@ -3,6 +3,8 @@ info:
   title: Ticket service Partner module
   description: The Partner module provides information about Events and handles reservations
   version: '1.0'
+servers:
+  - url: http://localhost:12222
 tags:
   - name: partner
     description: List events and reserve seats for them
