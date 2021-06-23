@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import partner.client.ApiClient;
 import partner.client.api.PartnerApi;
 
 import java.util.*;
@@ -23,7 +24,10 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
     @Value("${core.url}")
     private String coreUrl;
 
-    private ErrorResponseException errorResponseExpection(Long errorCode) {
+    @Value("${partner.apiKey}")
+    private String partnerApiKey;
+
+    private ErrorResponseException errorResponseException(Long errorCode) {
         ErrorResponse res = new ErrorResponse();
         res.setErrorCode(errorCode);
         res.setSuccess(false);
@@ -32,10 +36,12 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
 
     private List<Event> getEventList() {
         PartnerApi clnt = new PartnerApi();
+        ApiClient apiClient = clnt.getApiClient();
+        apiClient.addDefaultHeader("apiKey", this.partnerApiKey);
         try {
             partner.client.model.EventList clntEventList = clnt.getEvents();
             if(clntEventList == null || clntEventList.getData() == null) {
-                throw errorResponseExpection(404L);
+                throw errorResponseException(404L);
             }
 
             List<Event> eventList = new ArrayList<>();
@@ -52,24 +58,26 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
 
             return eventList;
         } catch (ResourceAccessException ex) {
-            throw errorResponseExpection(20404L);
+            throw errorResponseException(20404L);
         } catch (HttpClientErrorException ex) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 ErrorResponse res = mapper.readValue(ex.getResponseBodyAsString(), ErrorResponse.class);
                 throw new ErrorResponseException(res);
             } catch (JsonProcessingException ex2) {
-                throw errorResponseExpection(500L);
+                throw errorResponseException(500L);
             }
         }
     }
 
     private EventDetails getEventDetails(Long eventId) {
         PartnerApi clnt = new PartnerApi();
+        ApiClient apiClient = clnt.getApiClient();
+        apiClient.addDefaultHeader("apiKey", this.partnerApiKey);
         try {
             partner.client.model.EventDetails clntEvent = clnt.getEvent(eventId);
             if(clntEvent == null || clntEvent.getData() == null || clntEvent.getData().getSeats() == null) {
-                throw errorResponseExpection(404L);
+                throw errorResponseException(404L);
             }
 
             EventDetails details = new EventDetails();
@@ -86,7 +94,7 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
 
             return details;
         } catch (ResourceAccessException ex) {
-            throw errorResponseExpection(20404L);
+            throw errorResponseException(20404L);
         } catch (HttpClientErrorException ex) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
@@ -97,7 +105,7 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
 
                 throw new ErrorResponseException(res);
             } catch (JsonProcessingException ex2) {
-                throw errorResponseExpection(500L);
+                throw errorResponseException(500L);
             }
         }
     }
@@ -164,27 +172,29 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
         final long nowStr = new Date().toInstant().getEpochSecond();
         Optional<Event> e = eventList.stream().filter(event -> event.getEventId().equals(eventId)).findAny();
         if(e.isEmpty()) {
-            throw errorResponseExpection(20001L);
+            throw errorResponseException(20001L);
         }
 
         if(Long.parseLong(e.get().getStartTimeStamp()) < nowStr) {
-            throw errorResponseExpection(20011L);
+            throw errorResponseException(20011L);
         }
 
         EventDetails details = getEventDetails(eventId);
         Optional<Seat> s = details.getSeats().stream().filter(seat -> seat.getId().equals(seatId)).findAny();
         if(s.isEmpty()) {
-            throw errorResponseExpection(20002L);
+            throw errorResponseException(20002L);
         }
 
         if(s.get().getReserved()) {
-            throw errorResponseExpection(20010L);
+            throw errorResponseException(20010L);
         }
 
         decreaseBalance(userId, cardId, s.get().getPrice());
 
         try {
             PartnerApi clnt = new PartnerApi();
+            ApiClient apiClient = clnt.getApiClient();
+            apiClient.addDefaultHeader("apiKey", this.partnerApiKey);
             partner.client.model.SuccessfulReservation clntRes = clnt.reserveSeat(eventId, seatId);
 
             SuccessfulReservation res = new SuccessfulReservation();
@@ -194,7 +204,7 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
             return ResponseEntity.ok(res);
         } catch (ResourceAccessException ex) {
             increaseBalance(userId, cardId, s.get().getPrice());
-            throw errorResponseExpection(20404L);
+            throw errorResponseException(20404L);
         } catch (HttpClientErrorException ex) {
             increaseBalance(userId, cardId, s.get().getPrice());
             try {
@@ -203,7 +213,7 @@ public class TicketApiDelegateImpl implements TicketApiDelegate {
 
                 throw new ErrorResponseException(res);
             } catch (JsonProcessingException ex2) {
-                throw errorResponseExpection(500L);
+                throw errorResponseException(500L);
             }
         }
     }
